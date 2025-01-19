@@ -23,22 +23,27 @@ const rules = {
   },
 };
 const loginError = ref<string>('');
+const isLoading = ref<boolean>(false);
 
 const handleValidateClick = async (e: MouseEvent) => {
   e.preventDefault();
+  isLoading.value = true;
   formRef.value?.validate((errors) => {
     if (!errors) {
       signInWithEmailAndPassword(auth, formValue.value.email, formValue.value.password)
         .then(() => {
+          isLoading.value = false;
           router.push('/dashboard');
         })
         .catch((error) => {
           const errorMessage = error.message;
           loginError.value = errorMessage as string;
+          isLoading.value = false;
         });
     } else {
       console.log(errors);
       loginError.value = '';
+      isLoading.value = false;
     }
   });
 };
@@ -94,6 +99,7 @@ const handleValidateClick = async (e: MouseEvent) => {
                         type="primary"
                         size="large"
                         class="rounded-md flex-1"
+                        :loading="isLoading"
                         >Login
                     </NButton>
                 </NFormItem>
