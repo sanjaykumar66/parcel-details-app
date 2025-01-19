@@ -1,0 +1,100 @@
+<script setup lang="ts">
+import topBar from '../components/topBar.vue';
+import { NButton, NH1, NUpload, UploadFileInfo, useNotification } from 'naive-ui';
+import logsTable from '../components/logsTable.vue';
+import detailsModal from '../components/detailsModal.vue';
+import { ref } from 'vue';
+import { ParcelData, parcelStatusEnum } from '../types';
+import { parseCSV } from '../utils'
+import previewModal from '@/components/previewModal.vue';
+import { db, auth } from '../config/firebaseConfig';
+import { addDoc, collection } from 'firebase/firestore';
+
+
+const showModal = ref<boolean>(false)
+const title = ref<string>('Add Entry')
+const parcelData = ref<ParcelData>({
+    orderId: '',
+    date: new Date().getTime(),
+    porterPartner: '',
+    parcelStatus: parcelStatusEnum.PENDING
+})
+const isShowPreviewModal = ref<boolean>(false)
+const parseData = ref<ParcelData[]>([])
+const notification = useNotification()
+
+const showEntryModal = (data?:{key?:string,data?:ParcelData}) => {
+    showModal.value = true
+    title.value = data?.key === 'EDIT' ? 'Edit Entry' : 'Add Entry'
+    if(data?.data){
+        parcelData.value = data.data
+    }
+    else{
+        parcelData.value = {
+            orderId: '',
+            date: new Date().getTime(),
+            porterPartner: '',
+            parcelStatus: parcelStatusEnum.PENDING
+        }
+    }
+}
+
+const onUploadFile = (options: { file: UploadFileInfo, fileList: Array<UploadFileInfo>, event?: Event }) => {
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const contents = e.target?.result as string
+      const data = await parseCSV(contents)
+      parseData.value = data as unknown as ParcelData[]
+      isShowPreviewModal.value = true
+    }
+    if (options.file.file) {
+        reader.readAsText(options.file.file)
+    }
+}
+
+const uploadParsedData = () => {
+    parseData.value.forEach((data) => {
+        let timestamp: number;
+        if (typeof data.date === 'string' || typeof data.date === 'number') {
+            timestamp = new Date(data.date).getTime();
+        } else {
+            console.error('Invalid date format:', data.date);
+            return;
+        }
+
+        addDoc(collection(db, `users/${auth.currentUser?.uid}/parcels`), {
+            ...data,
+            date: timestamp
+        }).then(() => {
+            console.log('data uploaded')
+        })
+    })
+    isShowPreviewModal.value = false
+    notification.success({
+        title: 'Success',
+        content: 'CSV data uploaded successfully',
+        duration: 2500,
+        keepAliveOnHover: true
+    })
+}
+</script>
+<template>
+    <div class="h-screen overflow-hidden">
+        <topBar />
+        <div class="p-6 overflow-hidden" style="height: calc(100% - 50px);">
+            <div class="flex items-center justify-between space-x-4 mb-4">
+                <NH1 class="mb-0">Dashboard</NH1>
+                <div class="flex items-center space-x-4">
+                    <NUpload @change="onUploadFile" :show-file-list="false" :accept="'.csv'">
+                        <NButton class="rounded-xl bg-white" size="large" type="default">Upload Sheet</NButton>
+                    </NUpload>
+                    <NButton @click="showEntryModal()" class="rounded-xl" size="large" type="primary">Add Entry</NButton>
+                </div>
+                
+            </div>
+            <logsTable :showModal="showEntryModal" @show-modal="showEntryModal" />
+        </div>
+        <detailsModal v-if="showModal" :showModal="showModal" :title="title" :formData="parcelData" @closeModal="showModal=false"/>
+        <previewModal v-if="isShowPreviewModal" :show-modal="isShowPreviewModal" :parse-data="parseData" @closeModal="isShowPreviewModal=false" @uploadData="uploadParsedData" />
+    </div>
+</template>
