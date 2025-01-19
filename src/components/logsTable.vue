@@ -128,7 +128,7 @@ const getInitialPageCount = async() => {
     currentPage.value = 1
 }
 const getPageCountForFilters = async() =>{
-    if(parcelCompanyStatusValue.value.length === 0 && parcelCompanyFilterValue.value.length === 0){
+    if(parcelCompanyStatusValue.value.length === 0 && parcelCompanyFilterValue.value.length === 0 && dateRange.value === null){
         getDataFromDb(1)
         getInitialPageCount()
         return
@@ -154,7 +154,7 @@ onMounted(async () => {
 <template>
     <NCard :style="{height: 'calc(100% - 100px)'}" class="overflow-hidden">
         <div class="py-5 grid grid-flow-col grid-cols-3 items-center gap-4">
-            <NDatePicker @confirm="dateFilter"  :value="dateRange" type="daterange" clearable></NDatePicker>
+            <NDatePicker @confirm="dateFilter" @clear="dateFilter(null)"  :value="dateRange" type="daterange" clearable></NDatePicker>
             <NSelect max-tag-count="responsive" @update-value="companyFilter" :value="parcelCompanyFilterValue" :options="parcelCompanies" multiple clearable placeholder="Filter by Parcel Company"></NSelect>
             <NSelect max-tag-count="responsive" @update-value="statusFilter" :value="parcelCompanyStatusValue" :options="parcelStatus" multiple clearable placeholder="Filter by Parcel Status"></NSelect>
         </div>
