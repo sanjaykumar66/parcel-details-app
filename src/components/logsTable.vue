@@ -115,8 +115,7 @@ const statusFilter = async(value:string[]) => {
     parcelCompanyStatusValue.value = value
     getPageCountForFilters()
 }
-const dateFilter = async(value: [number, number] | null, formattedValue: [string, string] | null)=>{
-    console.log(formattedValue)
+const dateFilter = async(value: [number, number] | null)=>{
     queryCursor = {}
     dateRange.value = value
     getPageCountForFilters()
