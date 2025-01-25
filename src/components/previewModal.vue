@@ -27,11 +27,15 @@ const isLoading = ref<boolean>(false)
         </template>
         <template #default>
             <div class="p-4 max-h-[500px] overflow-y-auto">
-                <div v-for="data in parseData" :key="data.orderId" :class="['flex items-center justify-between border-b border-gray-200 py-2']">
-                    <div>{{ data.date }}</div>
-                    <div>{{ data.orderId }}</div>
-                    <div>{{ data.porterPartner }}</div>
-                    <div>{{ data.parcelStatus }}</div>
+                <div v-for="data in parseData" :key="data.invoiceNumber" :class="['flex items-center justify-between border-b border-gray-200 py-2']">
+                    <div>{{ data.storeCode }}</div>
+                    <div>{{ data.invoiceNumber }}</div>
+                    <div>{{ data.invoiceDate }}</div>
+                    <div>{{ data.despatchDate }}</div>
+                    <div>{{ data.cases }}</div>
+                    <div>{{ data.labels }}</div>
+                    <div>{{ data.transporter }}</div>
+                    <div>{{ data.status }}</div>
                 </div>
             </div>
             <div class="mt-4">

@@ -1,4 +1,5 @@
 import {SelectOption} from 'naive-ui'
+import { Value } from 'naive-ui/es/select/src/interface'
 export enum ActionTypes {
     EDIT = 'EDIT',
     DELETE = 'DELETE',
@@ -34,10 +35,14 @@ export const parcelStatus:SelectOption[] = [
 ]
 
 export interface ParcelData {
-    orderId: string
-    date: number | [number, number] | null
-    porterPartner: string
-    parcelStatus: parcelStatusEnum
-    firebaseId?: string
-    key?: number | string
+    storeCode: string
+    invoiceNumber: string
+    invoiceDate: Value | string | null | undefined | any
+    despatchDate: Value | string | null | undefined | any
+    cases: number | null
+    labels?: string[]
+    transporter:string
+    status:parcelStatusEnum
+    key?:string
+    trackingId?:string | null
 }

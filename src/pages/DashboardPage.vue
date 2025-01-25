@@ -14,10 +14,15 @@ import { addDoc, collection } from 'firebase/firestore';
 const showModal = ref<boolean>(false)
 const title = ref<string>('Add Entry')
 const parcelData = ref<ParcelData>({
-    orderId: '',
-    date: new Date().getTime(),
-    porterPartner: '',
-    parcelStatus: parcelStatusEnum.PENDING
+        storeCode: '',
+        invoiceNumber: '',
+        invoiceDate: null,
+        despatchDate: null,
+        cases: null,
+        labels:[],
+        transporter:'',
+        status:parcelStatusEnum.PENDING,
+        trackingId: null
 })
 const isShowPreviewModal = ref<boolean>(false)
 const parseData = ref<ParcelData[]>([])
@@ -31,10 +36,15 @@ const showEntryModal = (data?:{key?:string,data?:ParcelData}) => {
     }
     else{
         parcelData.value = {
-            orderId: '',
-            date: new Date().getTime(),
-            porterPartner: '',
-            parcelStatus: parcelStatusEnum.PENDING
+            storeCode: '',
+            invoiceNumber: '',
+            invoiceDate: null,
+            despatchDate: null,
+            cases: null,
+            labels:[],
+            transporter:'',
+            status:parcelStatusEnum.PENDING,
+            trackingId: null
         }
     }
 }
@@ -54,17 +64,9 @@ const onUploadFile = (options: { file: UploadFileInfo, fileList: Array<UploadFil
 
 const uploadParsedData = () => {
     parseData.value.forEach((data) => {
-        let timestamp: number;
-        if (typeof data.date === 'string' || typeof data.date === 'number') {
-            timestamp = new Date(data.date).getTime();
-        } else {
-            console.error('Invalid date format:', data.date);
-            return;
-        }
-
         addDoc(collection(db, `users/${auth.currentUser?.uid}/parcels`), {
             ...data,
-            date: timestamp
+          //  date: timestamp
         }).then(() => {
             console.log('data uploaded')
         })
