@@ -94,7 +94,7 @@ const handleValidateClick = async (e: MouseEvent) => {
             }
             else{
                 updateDoc(doc(db, `users/${auth.currentUser?.uid}/parcels/${formValue.value.key}`), formValue.value).then(() => {
-                    emit('closeModal', false)
+                    emit('closeModal', formValue.value)
                     notification.success({
                         title: 'Success',
                         content: 'Parcel details updated successfully',
@@ -115,6 +115,10 @@ const handleValidateClick = async (e: MouseEvent) => {
 onMounted(() => {
    if(props.formData){
        formValue.value = props.formData
+       formValue.value = {
+        ...formValue.value,
+        cases: formValue.value.cases ? parseInt(formValue.value.cases as unknown as string) : null,
+       }
    }
 })
 </script>
@@ -168,7 +172,7 @@ onMounted(() => {
                     />
                 </NFormItem>
                 <NFormItem label="Cases" path="cases">
-                    <NInputNumber :value="formValue.cases" @update:value="val => formValue.cases = val" placeholder="Enter Cases" class="w-full"/>
+                    <NInputNumber :value="formValue.cases as number" @update:value="val => formValue.cases = val" placeholder="Enter Cases" class="w-full"/>
                 </NFormItem>
                 <NFormItem label="Parcel Status" path="status">
                     <NSelect v-model:value="formValue.status" :options="parcelStatus" placeholder="Select Status"/>

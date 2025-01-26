@@ -79,6 +79,18 @@ const uploadParsedData = () => {
         keepAliveOnHover: true
     })
 }
+
+const updateParcelData = (data:ParcelData) =>{
+    parcelData.value.invoiceNumber = data.invoiceNumber || '';
+    parcelData.value.invoiceDate = data.invoiceDate || null;
+    parcelData.value.despatchDate = data.despatchDate || null;
+    parcelData.value.cases = data.cases || null;
+    parcelData.value.labels = data.labels || [];
+    parcelData.value.transporter = data.transporter || '';
+    parcelData.value.status = data.status || parcelStatusEnum.PENDING;
+    parcelData.value.trackingId = data.trackingId || null;
+    showModal.value = false
+}
 </script>
 <template>
     <div class="h-screen overflow-hidden">
@@ -94,9 +106,9 @@ const uploadParsedData = () => {
                 </div>
                 
             </div>
-            <logsTable :showModal="showEntryModal" @show-modal="showEntryModal" />
+            <logsTable :formData="parcelData" :showModal="showEntryModal" @show-modal="showEntryModal" />
         </div>
-        <detailsModal v-if="showModal" :showModal="showModal" :title="title" :formData="parcelData" @closeModal="showModal=false"/>
+        <detailsModal v-if="showModal" :showModal="showModal" :title="title" :formData="parcelData" @closeModal="updateParcelData"/>
         <previewModal v-if="isShowPreviewModal" :show-modal="isShowPreviewModal" :parse-data="parseData" @closeModal="isShowPreviewModal=false" @uploadData="uploadParsedData" />
     </div>
 </template>

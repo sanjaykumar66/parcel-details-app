@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NCard, NDataTable, NDatePicker, NSelect, NDropdown, NButton, NTag, NModal } from 'naive-ui';
 import type { DataTableColumns} from 'naive-ui';
-import { ref, h, onMounted } from 'vue';
+import { ref, h, onMounted, watch } from 'vue';
 import dropdownIcon from '../assets/dropdown.svg'
 import { ActionTypes, parcelCompanies, parcelStatus, ParcelData } from '../types'
 import { query, collection, startAfter, limit, getDocs, orderBy, getCountFromServer, where, deleteDoc, doc } from 'firebase/firestore';
@@ -78,6 +78,12 @@ const columns:DataTableColumns<ParcelData> = [
         }
     }
 ] 
+const props = defineProps({
+    formData: {
+        type: Object as () => ParcelData,
+        default: () => ({})
+    }
+})
 
 const parcelData = ref<ParcelData[]>([])
 const dateRange = ref<[number, number] | null>(null)
@@ -197,12 +203,23 @@ const deleteData = async() => {
 }
 const removeSelectedItems = () => {
     selectedKeys.value = []
+    showDeleteModal.value = false
 }
 onMounted(async () => {
     getDataFromDb(1)
     getInitialPageCount()
 })
 
+watch( () => props.formData, (newVal:ParcelData) => {
+    if(newVal.key){
+       parcelData.value = parcelData.value.map((data) => {
+            if(data.key === newVal.key){
+                return newVal
+            }
+            return data
+        })
+    }
+}, {deep: true})
 </script>
 <template>
     <div :style="{height: 'calc(100% - 100px)'}" > 
@@ -283,7 +300,8 @@ onMounted(async () => {
             positive-text="Submit"
             negative-text="Cancel"
             @positive-click="deleteData"
-            @negative-click=""
+            @negative-click="removeSelectedItems"
+            @close="removeSelectedItems"
         >
         </NModal>
     </div>
