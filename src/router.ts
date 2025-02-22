@@ -5,7 +5,7 @@ import { auth } from './config/firebaseConfig'
 const routes = [
   { path: '/', name: 'login', component: () => import('./pages/LoginPage.vue') },
   { path: '/dashboard', name: 'dashboard', component: () => import('./pages/DashboardPage.vue') , meta: { requiresAuth: true } },
-  { path: '/upload', name: 'upload', component: () => import('./components/FileUploader.vue') , meta: { requiresAuth: true } },
+  // { path: '/upload', name: 'upload', component: () => import('./components/FileUploader.vue') , meta: { requiresAuth: true } },
   // { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
