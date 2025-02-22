@@ -45,4 +45,42 @@ export interface ParcelData {
     status:parcelStatusEnum
     key?:string
     trackingId?:string | null
+}   
+
+export enum topBarTabs {
+    PARCEL = 'Parcel',
+    STORE = 'Store',
+}
+
+export interface StoreData {
+    address: string
+    allowBill: boolean
+    alternatecode: number
+    area: number
+    areaName: string
+    code: number
+    creditDays: string
+    creditLimit: string
+    custCategory: number
+    email: string
+    gstNo: string
+    location: string
+    mobile: number | string
+    name: string
+    phone1: number | string
+    phone2: number | string
+    place: string
+    salesMan: string
+    state: string
+    street: string
+    webPassword: string
+    key:string
+}
+
+export interface SalesMan {
+    key?: string
+    name: string
+    mobile?: number | string
+    email?: string
+    code?: number
 }

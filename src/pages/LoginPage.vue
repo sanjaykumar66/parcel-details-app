@@ -5,6 +5,7 @@ import { ref } from "vue";
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 import router from "../router";
+import Logo from '../assets/logo.webp'
 const formRef = ref<FormInst | null>(null);
 const formValue = ref({
   email: "",
@@ -56,7 +57,7 @@ const handleValidateClick = async (e: MouseEvent) => {
             <div class="w-full">
             <img
                 class="mx-auto h-10 w-auto"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
+                :src="Logo"
                 alt="Your Company"
             />
             <h2

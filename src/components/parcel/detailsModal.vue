@@ -2,8 +2,8 @@
 import { NModal, NH2, NForm, NFormItem, NDatePicker, NInput, NSelect, NButton, useNotification, NInputNumber, FormRules } from 'naive-ui';
 import { onMounted, ref } from 'vue';
 import type { FormInst } from 'naive-ui'
-import {parcelCompanies, parcelStatus, parcelStatusEnum, ParcelData, ActionTypes} from '../types'
-import { db, auth } from '../config/firebaseConfig';
+import {parcelCompanies, parcelStatus, parcelStatusEnum, ParcelData, ActionTypes} from '../../types'
+import { db } from '../../config/firebaseConfig';
 import { addDoc, collection, updateDoc, doc } from 'firebase/firestore';
 const props = defineProps({
     showModal: {
@@ -72,7 +72,7 @@ const rules:FormRules = {
         trigger: "blur",
     }
 };
-const emit = defineEmits(['closeModal'])
+const emit = defineEmits(['closeModal', 'updateTable'])
 const handleValidateClick = async (e: MouseEvent) => {
     e.preventDefault();
     formRef.value?.validate((errors) => {
@@ -80,7 +80,7 @@ const handleValidateClick = async (e: MouseEvent) => {
             isLoading.value = true;
             const type = props.title === 'Add Entry' ? ActionTypes.ADD : ActionTypes.EDIT;
             if(type === ActionTypes.ADD){
-                addDoc(collection(db, `users/${auth.currentUser?.uid}/parcels`), formValue.value).then(() => {
+                addDoc(collection(db, `parcels`), formValue.value).then(() => {
                     emit('closeModal', false)
                     notification.success({
                         title: 'Success',
@@ -88,12 +88,14 @@ const handleValidateClick = async (e: MouseEvent) => {
                         duration: 2500,
                         keepAliveOnHover: true
                     })
+                    emit('updateTable')
                 }).catch((error) => {
                     console.error("Error adding document: ", error);
                 });
+                
             }
             else{
-                updateDoc(doc(db, `users/${auth.currentUser?.uid}/parcels/${formValue.value.key}`), formValue.value).then(() => {
+                updateDoc(doc(db, `parcels/${formValue.value.key}`), formValue.value).then(() => {
                     emit('closeModal', formValue.value)
                     notification.success({
                         title: 'Success',
@@ -101,6 +103,7 @@ const handleValidateClick = async (e: MouseEvent) => {
                         duration: 2500,
                         keepAliveOnHover: true
                     })
+                    emit('updateTable')
                 }).catch((error) => {
                     console.error("Error updating document: ", error);
                 });

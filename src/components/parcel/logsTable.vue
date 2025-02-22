@@ -2,10 +2,10 @@
 import { NCard, NDataTable, NDatePicker, NSelect, NDropdown, NButton, NTag, NModal } from 'naive-ui';
 import type { DataTableColumns} from 'naive-ui';
 import { ref, h, onMounted, watch } from 'vue';
-import dropdownIcon from '../assets/dropdown.svg'
-import { ActionTypes, parcelCompanies, parcelStatus, ParcelData } from '../types'
+import dropdownIcon from '../../assets/dropdown.svg'
+import { ActionTypes, parcelCompanies, parcelStatus, ParcelData } from '../../types'
 import { query, collection, startAfter, limit, getDocs, orderBy, getCountFromServer, where, deleteDoc, doc } from 'firebase/firestore';
-import { db, auth } from '../config/firebaseConfig';
+import { db } from '../../config/firebaseConfig';
 const columns:DataTableColumns<ParcelData> = [
     {
         type:'selection',
@@ -82,6 +82,10 @@ const props = defineProps({
     formData: {
         type: Object as () => ParcelData,
         default: () => ({})
+    },
+    updateTable: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -125,7 +129,7 @@ const getDataFromDb = async (start:number) => {
 
     filters.push(limit(30))
     parcelsQuery =  query(
-            collection(db, `users/${auth.currentUser?.uid}/parcels`), 
+            collection(db, `parcels`), 
             ...filters,
             )
     const querySnapshot = await getDocs(parcelsQuery);
@@ -157,7 +161,7 @@ const dateFilter = async(value: [number, number] | null)=>{
     getPageCountForFilters()
 }
 const getInitialPageCount = async() => {
-    const parcelsCollection = collection(db, `users/${auth.currentUser?.uid}/parcels`)
+    const parcelsCollection = collection(db, `parcels`)
     const snapshot  = await getCountFromServer(parcelsCollection)
     const totalDocuments = snapshot.data().count;
     totalPage.value = Math.ceil(totalDocuments / 30);
@@ -170,7 +174,7 @@ const getPageCountForFilters = async() =>{
         return
     }
     const parcelsCollection = query(
-                collection(db, `users/${auth.currentUser?.uid}/parcels`), 
+                collection(db, `parcels`), 
                 orderBy('invoiceDate','desc'),
                 ...(parcelCompanyFilterValue.value.length > 0 ? [where('transporter', 'in', parcelCompanyFilterValue.value)] : []), 
                 ...(parcelCompanyStatusValue.value.length > 0 ? [where('status', 'in', parcelCompanyStatusValue.value)] : []),
@@ -191,7 +195,7 @@ const deleteData = async() => {
         isDataLoading.value = true
         await Promise.all(
             selectedKeys.value.map(async (key) => {
-                await deleteDoc(doc(db, `users/${auth.currentUser?.uid}/parcels/${key}`));
+                await deleteDoc(doc(db, `parcels/${key}`));
             })
         );
         await getPageCountForFilters();
@@ -220,6 +224,12 @@ watch( () => props.formData, (newVal:ParcelData) => {
         })
     }
 }, {deep: true})
+
+watch( () => props.updateTable, (newVal:boolean) => {
+    if(newVal){
+        getDataFromDb(1)
+    }
+})
 </script>
 <template>
     <div :style="{height: 'calc(100% - 100px)'}" > 
