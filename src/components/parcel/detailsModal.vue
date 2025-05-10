@@ -130,70 +130,75 @@ onMounted(() => {
         :show="showModal"
         :mask-closable="false"
          preset="card"
-         class="max-w-[500px]"
+        class="max-w-[90%] h-[80vh] store-modal"
         @close="() => $emit('closeModal', false)"
     >
         <template #header>
             <NH2 class="mb-0">{{ title }}</NH2>
         </template>
         <template #default>
-            <NForm
-                showRequireMark
-                size="large"
-                ref="formRef"
-                :rules="rules"
-                :model="formValue"
-            >
-                <NFormItem label="Store Code" path="storeCode">
-                    <NInput v-model:value="formValue.storeCode" placeholder="Enter Store Coder"/>
-                </NFormItem>
-                <NFormItem label="Invoice Number" path="invoiceNumber">
-                    <NInput v-model:value="formValue.invoiceNumber" placeholder="Enter Invoice Number"/>
-                </NFormItem>
-                <NFormItem label="Transporter" path="transporter">
-                    <NSelect v-model:value="formValue.transporter" :options="parcelCompanies" placeholder="Select transporter"/>
-                </NFormItem>
-                
-                <NFormItem label="Invoice Date" path="invoiceDate">
-                    <NDatePicker 
-                        :value="formValue.invoiceDate ? new Date(formValue.invoiceDate as string) : formData.invoiceDate" 
-                        type="date"
-                        placeholder="Select Date"
-                        class="w-full"
-                        @update:value="val => formValue.invoiceDate = val ? new Date(val).toISOString(): null"
-                        clearable
-                    />
-                </NFormItem>
-                <NFormItem label="Dispatch Date" path="despatchDate">
-                    <NDatePicker 
-                        :value="formValue.despatchDate? new Date(formValue.despatchDate as string) : formData.despatchDate" 
-                        type="date"
-                        placeholder="Select Date"
-                        class="w-full"
-                        @update:value="val => formValue.despatchDate = val? new Date(val).toISOString(): null"
-                        clearable
-                    />
-                </NFormItem>
-                <NFormItem label="Cases" path="cases">
-                    <NInputNumber :value="formValue.cases as number" @update:value="val => formValue.cases = val" placeholder="Enter Cases" class="w-full"/>
-                </NFormItem>
-                <NFormItem label="Parcel Status" path="status">
-                    <NSelect v-model:value="formValue.status" :options="parcelStatus" placeholder="Select Status"/>
-                </NFormItem>
-                <NFormItem label="Tracking ID" path="trackingId">
-                    <NInput v-model:value="formValue.trackingId" placeholder="Enter tracking Id"/>
-                </NFormItem>
-                <NFormItem class="!grid-rows-[minmax(0,auto)_1fr]" :feedback="formError" validation-status="error">
-                    <NButton
-                        @click="handleValidateClick"
-                        type="primary"
-                        size="large"
-                        class="rounded-md flex-1"
-                        :loading="isLoading"
-                        >Submit
-                    </NButton>
-                </NFormItem>
-            </NForm>
+            <div class="flex flex-col h-full">
+                <NForm
+                    showRequireMark
+                    size="large"
+                    ref="formRef"
+                    :rules="rules"
+                    :model="formValue"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto flex-1"
+                >
+                    <NFormItem label="Store Code" path="storeCode" class="col-span-1">
+                        <NInput v-model:value="formValue.storeCode" placeholder="Enter Store Coder"/>
+                    </NFormItem>
+                    <NFormItem label="Invoice Number" path="invoiceNumber" class="col-span-1">
+                        <NInput v-model:value="formValue.invoiceNumber" placeholder="Enter Invoice Number"/>
+                    </NFormItem>
+                    <NFormItem label="Transporter" path="transporter" class="col-span-1">
+                        <NSelect v-model:value="formValue.transporter" :options="parcelCompanies" placeholder="Select transporter"/>
+                    </NFormItem>
+                    
+                    <NFormItem label="Invoice Date" path="invoiceDate" class="col-span-1">
+                        <NDatePicker 
+                            :value="formValue.invoiceDate ? new Date(formValue.invoiceDate as string) : formData.invoiceDate" 
+                            type="date"
+                            placeholder="Select Date"
+                            class="w-full"
+                            @update:value="val => formValue.invoiceDate = val ? new Date(val).toISOString(): null"
+                            clearable
+                        />
+                    </NFormItem>
+                    <NFormItem label="Dispatch Date" path="despatchDate" class="col-span-1">
+                        <NDatePicker 
+                            :value="formValue.despatchDate? new Date(formValue.despatchDate as string) : formData.despatchDate" 
+                            type="date"
+                            placeholder="Select Date"
+                            class="w-full"
+                            @update:value="val => formValue.despatchDate = val? new Date(val).toISOString(): null"
+                            clearable
+                        />
+                    </NFormItem>
+                    <NFormItem label="Cases" path="cases" class="col-span-1">
+                        <NInputNumber :value="formValue.cases as number" @update:value="val => formValue.cases = val" placeholder="Enter Cases" class="w-full"/>
+                    </NFormItem>
+                    <NFormItem label="Parcel Status" path="status" class="col-span-1">
+                        <NSelect v-model:value="formValue.status" :options="parcelStatus" placeholder="Select Status"/>
+                    </NFormItem>
+                    <NFormItem label="Tracking ID" path="trackingId" class="col-span-1">
+                        <NInput v-model:value="formValue.trackingId" placeholder="Enter tracking Id"/>
+                    </NFormItem>
+                </NForm>
+                <div class="mt-4 border-t pt-4">
+                    <NFormItem class="flex justify-end"  :feedback="formError" validation-status="error">
+                        <NButton
+                            @click="handleValidateClick"
+                            type="primary"
+                            size="large"
+                            class="rounded-md flex-1"
+                            :loading="isLoading"
+                            >Submit
+                        </NButton>
+                    </NFormItem>
+                </div>
+            </div>
         </template>
     </NModal>
 </template>
