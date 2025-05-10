@@ -60,15 +60,15 @@ export interface StoreData {
     areaName: string
     code: number
     creditDays: string
-    creditLimit: string
+    creditLimit: string 
     custCategory: number
     email: string
     gstNo: string
     location: string
-    mobile: number | string
+    mobile: number 
     name: string
-    phone1: number | string
-    phone2: number | string
+    phone1: number 
+    phone2: number 
     place: string
     salesMan: string
     state: string

@@ -1,25 +1,31 @@
 <script setup lang="ts">
-import { NDataTable, NCard } from 'naive-ui';
+import { NDataTable, NCard, NDropdown, NModal } from 'naive-ui';
 import type { DataTableColumns} from 'naive-ui';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, h } from 'vue';
 import { StoreData, SalesMan } from '../../types';
-// import dropdownIcon from '../../assets/dropdown.svg';
-import { query, collection, limit, getDocs, orderBy, getCountFromServer, startAfter, where } from 'firebase/firestore';
+import dropdownIcon from '../../assets/dropdown.svg';
+import { query, collection, limit, getDocs, orderBy, getCountFromServer, startAfter, where, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../config/firebaseConfig';
 import filtersSection from './filtersSection.vue';
 import paginationSection from './paginationSection.vue';
+import { ActionTypes } from '../../types';
 const emits = defineEmits(['showModal'])
 const selectedKeys = ref<Array<string | number>>([])
-// const showDeleteModal = ref<boolean>(false)
+const showDeleteModal = ref<boolean>(false)
 const isDataLoading = ref<boolean>(false)
 const storeData = ref<StoreData[]>([])
 const lastVisible = ref<any>(null)
 let queryCursor:any = {}
 const currentPage = ref<number>(1)
-const salesMen = ref<SalesMan[]>([])
 const totalPage = ref<number>(100)
 const salesManFilter = ref<string[]>([])
 const searchFilter = ref<string>('')
+const props = defineProps({
+    salesMen: {
+        type: Array as () => SalesMan[],
+        required: true
+    }
+})
 const columns:DataTableColumns<StoreData> = [
     {
         type:'selection',
@@ -134,36 +140,36 @@ const columns:DataTableColumns<StoreData> = [
         key: 'custCategory',
         width: 300,
     },
-    // {
-    //     title: 'Action',
-    //     key: 'action',
-    //     width: '80px',
-    //     fixed: 'right',
-    //     render(row) {
-    //         return h(NDropdown, {
-    //                 trigger: 'click',
-    //                 options: [
-    //                     { key:ActionTypes.EDIT,label: 'Edit Details' },
-    //                     { key:ActionTypes.DELETE , label: 'Delete' },
-    //                 ],
-    //                 onSelect: (key: string | number) => {
-    //                             if(key === ActionTypes.EDIT){
-    //                                 emits('showModal',{key: key, data: row})
-    //                             }
-    //                             else if(key === ActionTypes.DELETE){
-    //                                 selectedKeys.value = [row.key as string]
-    //                                 showDeleteModal.value = true
-    //                             }
-    //                         }
-    //             }, 
-    //             {
-    //                 default:() => [
-    //                     h(dropdownIcon, { class: 'h-4 cursor-pointer hover:text-blue-500'}),
-    //                 ]
-    //             }    
-    //         )
-    //     }
-    // }
+    {
+        title: 'Action',
+        key: 'action',
+        width: '80px',
+        fixed: 'right',
+        render(row) {
+            return h(NDropdown, {
+                    trigger: 'click',
+                    options: [
+                        { key:ActionTypes.EDIT,label: 'Edit Details' },
+                        { key:ActionTypes.DELETE , label: 'Delete' },
+                    ],
+                    onSelect: (key: string | number) => {
+                                if(key === ActionTypes.EDIT){
+                                    emits('showModal',{key: key, data: row})
+                                }
+                                else if(key === ActionTypes.DELETE){
+                                    selectedKeys.value = [row.key as string]
+                                    showDeleteModal.value = true
+                                }
+                            }
+                }, 
+                {
+                    default:() => [
+                        h(dropdownIcon, { class: 'h-4 cursor-pointer hover:text-blue-500'}),
+                    ]
+                }    
+            )
+        }
+    }
 ] 
 
 const handleCheck = (keys:Array<string | number>) => {
@@ -214,24 +220,14 @@ const getInitialPageCount = async() => {
 
 onMounted(async () => {
     getDataFromDb(1)
-    getSalesMenData()
     getInitialPageCount()
 })
 
-const getSalesMenData = async () => {
-    const salesMenQuery = query(collection(db, `salesmen`))
-    const querySnapshot = await getDocs(salesMenQuery)
-    querySnapshot.forEach((doc) => {
-        salesMen.value.push({
-            key: doc.id,
-            ...doc.data()
-        } as SalesMan)
-    })
-}
+
 
 const handleSalesManFilter = (selectedValue:string[]) => {
     queryCursor = {}
-    salesManFilter.value = salesMen.value.filter((salesMan) => selectedValue.includes(salesMan.key || '')).map((salesMan) => salesMan.name)
+    salesManFilter.value = props.salesMen.filter((salesMan:SalesMan) => selectedValue.includes(salesMan.key || '')).map((salesMan:SalesMan) => salesMan.name)
     getPageCountForFilters()
 }
 
@@ -260,6 +256,27 @@ const handleSearch = (searchValue:string) => {
     getPageCountForFilters()
 }
 
+const deleteData = async() => {
+    showDeleteModal.value = false
+    try {
+        isDataLoading.value = true
+        await Promise.all(
+            selectedKeys.value.map(async (key) => {
+                await deleteDoc(doc(db, `stores/${key}`));
+            })
+        );
+        await getPageCountForFilters();
+        isDataLoading.value = false
+        selectedKeys.value = []
+    } catch (error) {
+        console.error("Error deleting documents:", error);
+    }
+}
+
+const removeSelectedItems = () => {
+    selectedKeys.value = []
+    showDeleteModal.value = false
+}
 </script>
 
 <template>
@@ -281,5 +298,17 @@ const handleSearch = (searchValue:string) => {
                 />
             <paginationSection :currentPage="currentPage" :totalPage="totalPage" @update:currentPage="getDataFromDb" />
         </NCard>
+        <NModal
+            :show="showDeleteModal"
+            preset="dialog"
+            title="Confirm Delete"
+            content="Are you sure to delete?"
+            positive-text="Submit"
+            negative-text="Cancel"
+            @positive-click="deleteData"
+            @negative-click="removeSelectedItems"
+            @close="removeSelectedItems"
+        >
+        </NModal>
     </div>
 </template>
